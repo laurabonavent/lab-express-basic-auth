@@ -11,6 +11,14 @@ const salt = bcryptjs.genSaltSync(10);
 
 router.post("/signup", (req, res, next) => {
   console.log("valeurs", req.body);
+  const { username, password } = req.body;
+  if (username === '' || password === '' || error.code === 11000) {
+    res.render('auth', {
+      errorMessage: 'Wrong information'
+    });
+    return;
+  }
+  
   // enregistrer notre user en base
 
   const plainPassword = req.body.password;
@@ -55,7 +63,7 @@ router.post("/login", (req, res, next) => {
       if (bcryptjs.compareSync(password, user.passwordHash)) {
         req.session.user = user;
 
-        res.send("loggé");
+        res.redirect('profile');
       } else {
         res.render("login", { errorMessage: "blabla" });
       }
@@ -70,8 +78,24 @@ router.get("/profile", (req, res, next) => {
     res.redirect('/login')
   }
   
-  res.render('users/userProfile', {
+  res.render('profile', {
     user: req.session.user
   })
 })
+
+router.get("/main", (req, res, next) => {
+  res.render("main")
+})
+
+router.get("/private", (req, res, next) => {
+  if (!req.session.user) {
+    res.redirect('/login')
+  }
+  
+  res.render('private', {
+    user: req.session.user
+  })
+  
+})
+
 module.exports = router;
